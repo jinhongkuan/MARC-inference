@@ -1,10 +1,10 @@
 # MARC-inference
 
-Most procurement software for property management handles the administrative burden. MARC infers existing owner–vendor relationships from varied source data (invoices, GL exports, pricing sheets) and uses them to drive agent-led negotiation that brings down OpEx for goods and services.
+Most agentic solutions for property management aim to automate the administrative burden. MARC goes further: it infers implicit contractual terms from invoices, GL exports and pricing sheets, and uses them to drive agent-led negotiation that brings down OpEx for goods and services.
 
-This repo is a spike on MARC's distinct engineering challenge: **how to accurately discover missed savings opportunities at scale when the source data may only have incomplete traces of pre-negotiated deals?**
+The search strategy for savings opportunities has the most direct impact on that value proposition, yet it's also the greatest source of uncertainty in the system and the part most likely to change. This repo proposes a hypothetical, scalable pipeline built around that tension, with stated trade-offs and mitigation strategies.
 
-It also compares ML pipelines on accuracy against what they cost MARC to run, because inference spend is MARC's own OpEx.
+The [benchmark](#benchmark) tests the rule-directed search strategy on a real-world dataset, where it matches a state-of-the-art model's precision at a fraction of the cost.
 
 ## The problem
 
@@ -23,252 +23,160 @@ Most negotiated rates aren't written down anywhere MARC can read. Documents prov
   vary                  in the wrong account
 ```
 
-For example, the same vendor's valet trash invoices bill ELM-09 at $18.50 a door and OAK-03 at $22.00. Whether that's an overcharge depends on a third document: an amendment to the service agreement prices properties under 150 doors at $22.00, and everything larger at $18.50. OAK-03 has 240 doors, so it's overpaying $840 a month. Neither invoice points to the amendment, so MARC needs to construct this relationship on its own.
+For example, the same vendor's valet trash invoices bill ELM-09 at $18.50 a door and OAK-03 at $22.00. Whether that's an overcharge depends on a third document: an amendment to the service agreement prices properties under 150 doors at $22.00, and everything larger at $18.50. OAK-03 has 240 doors, so it's overpaying $840 a month. Neither invoice points to the amendment, so MARC needs to construct this relationship on its own. Doing that reliably, for every customer, sets three requirements:
 
 ### Requirements
 
 1. **Extensibility.** A new invoice layout, vendor spelling or document kind must not need infrastructure changes or expensive database migrations.
-2. **Accuracy.** Findings must get complex accounting right (escalators, per-unit rates, miscoded lines) precisely enough to justify a voice agent phoning a vendor.
-3. **Scale.** The engine must handle millions of raw sources.
+2. **Precision.** Findings must get complex accounting right (escalators, per-unit rates, miscoded lines) reliably enough to justify a voice agent phoning a vendor: at least 95% precision.
+3. **Scale.** The engine must handle millions of raw sources, around 100,000 per customer, and answer a cold query within minutes.
 
 <details>
 <summary>Rationale</summary>
 
 - **Extensibility.** One ruleset has to hold across invoice layouts, vendor spellings, units and document kinds.
-- **Accuracy.** A finding chains arithmetic across documents, so one misread number changes the answer. A false call spends vendor goodwill and reads as spam. A missed one can be caught later by another ruleset. When the two conflict, precision wins.
+- **Precision.** A finding chains arithmetic across documents, so one misread number changes the answer. A false call spends vendor goodwill and reads as spam. A missed one can be caught later by another ruleset. When the two conflict, precision wins.
 - **Scale.** The assumption is that volume grows mostly with the number of customers, not the size of one, so each customer's corpus stays small enough to query on its own. That holds for owner-operators. Revisit it when MARC sells to third-party managers, whose portfolios span many owners.
 
 </details>
 
-Standard retrieval-augmented generation (RAG) scales, but makes us pick between accuracy and extensibility. Vector search over document chunks works on any format, but returns passages that look relevant, not the exact rate a call needs. Text-to-SQL over an extracted schema is exact, but only for fields chosen up front.
+**Preliminary observations.** Standard retrieval-augmented generation (RAG) that utilizes vector search over document chunks works on any format, but is unsuitable for our use case, where an inaccurate value for a single term can derail the accounting (see [Decision 3](#decision-3-rule-directed-retrieval-not-semantic-search)). A relational database with a fixed schema allows cheap comparison, but deciding the correct schema ahead of time is intractable and modifications are costly (see [Decision 2](#decision-2-read-through-fact-cache-populated-on-demand-by-the-rules)).
 
-## The approach
+## Proposed solution
 
-To stay accurate without giving up extensibility, we propose a *neurosymbolic pipeline*: Prolog rulesets drive LLM extraction and perform arithmetic and logical operations deterministically. Documents are parsed lazily, and each fact is stored on its own against its source document, so a new rule can ask a new question of old documents without any re-ingestion or schema change.
+We propose a _neurosymbolic pipeline_ that keeps precision high without giving up extensibility: Prolog rulesets drive LLM extraction and perform arithmetic and logical operations deterministically. Documents are parsed lazily, and each fact is stored on its own in a sparse Postgres table, keyed to its source document, so a new rule can ask a new question of old documents without any re-ingestion or schema change.
 
-![Side by side: parse at ingestion fills every field of every document, including fields no rule uses, and backfills a new column when the ruleset is amended. The lazy design computes only the leaves the rules reach, in batched model calls, and the amended ruleset adds one batch on top of cached work](docs/img/architecture.svg)
+### Decision 1: Lazy compute (parse raw sources only when needed)
 
-Parse at ingestion pays to extract every field up front, then pays again to backfill every document when a ruleset changes. The lazy design extracts only what the rules reach, and an amended ruleset adds one batched model call on top of cached work.
-
-One global judgment you can't measure becomes thousands of local ones you can.
-
-![One prompt with implicit math, against encoded Prolog strategies with explicit math](docs/img/overview.svg)
-
-On real data, a Prolog rule let Haiku 5.5 match Opus 5.5's precision at a twelfth of the cost ([benchmarking results](#benchmarking-results)).
-
-There are three ways to answer a question like "does this invoice match what was agreed?"
-
-|              | How it works                                                                                                                             | What it costs                                                                                                                                               |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Trivial**  | Give a frontier model the documents for every question, and cache answers by question.                                                   | Accurate, but costly and slow. Every new question re-reads the documents, and a cached answer only helps the identical question.                            |
-| **Baseline** | Decide the fields up front (item, quantity, price), parse every document into them, store them in a database, and query it.              | Cheap and fast per query, until a question needs a field nobody extracted. Then the schema has to be migrated and every document read again to backfill it. |
-| **Proposed** | Write the question as a Prolog rule. The rule asks for the facts it needs, and each fact is read from its document on demand and cached. | Work grows with what the questions touch, not with the corpus. A new question reads only the facts no earlier question asked for.                           |
-
-The baseline's weak point is that someone has to guess the fields before knowing the questions. The proposed design works backwards from the question, so nothing is extracted on a guess, and the cache is built from facts that a real question needed.
-
-**Why Prolog?** Every strategy is a join across documents. It takes the rate on an invoice line, the door count on a rent roll and the cap in a contract, and matches them on property, vendor and item. In Prolog that join is the rule itself. Shared variables like `Prop` and `Item` do the matching and backtracking searches the combinations, so a rule states what must hold without spelling out how to find it. Prolog also handles caching: tabling stores each subgoal it proves, so a `rate(_, oak03, valet_trash, _)` worked out for one rule is reused by every rule that asks the same question.
-
-What Prolog doesn't decide is which documents it searches. That set is fixed ahead of time from **owner–vendor metadata**, before any rule runs (see [Routing decides what a query may touch](#routing-decides-what-a-query-may-touch)). The diagram shows the design this spike builds toward, and its figures are illustrative.
-
-## The architecture
-
-A Prolog engine runs rulesets over a sparse Postgres fact table, and a message queue feeds the facts it's missing to batched extraction workers that read them from the source documents.
+_Latency vs Scalability_
 
 ![A pending spend decision (out of scope, the motivating use case) queries the Prolog engine. The engine loads facts from a sparse Postgres fact table. Missing facts go onto a message queue, extraction workers drain it in batches, read the documents and write the facts back, and the engine reruns. Findings go to a voice agent (also out of scope) and a human approves](docs/img/system.svg)
 
-This is to support lazy compute: nothing is extracted until a rule asks for it, and anything extracted once is reused by every rule after (see [The approach](#the-approach)).
+On query, Prolog rulesets orchestrate the extraction of facts from stored documents, reusing previously cached facts, so parsing is done only when needed. Missing facts are queued and extracted in batches, and the query reruns until nothing is missing.
 
-In short:
+We introduce a message queue to make extraction fault-tolerant: failed reads retry with backoff, unreadable documents go to a dead-letter queue, and at-least-once delivery is safe because facts are keyed by document hash, predicate, arguments and extractor version, so every write is an idempotent upsert.
 
-- **Lazy compute.** Rulesets run as a query when a spend decision is pending, not on a schedule. Each fact is read from its document the first time a rule asks for it.
-- **Deterministic routing.** Owner–vendor metadata, not a model, decides which documents a query may touch. Evidence a rule negates is routed more broadly than evidence it asserts.
-- **Persist facts, not answers.** Facts cost a model call, so they live in Postgres, keyed so they invalidate themselves. Derived answers cost milliseconds of Prolog, so they stay in memory.
-- **Batch the misses.** The engine queues every fact it's missing, workers extract them in batches, and the query reruns until nothing is missing.
-- **The cost:** latency on cold data, and no standing list of every opportunity.
+**Tradeoff.** Assuming:
 
-The spike's code is still a staged pipeline (ingest, resolve, infer, discover). The rest of this section describes where it's headed.
+- 100,000 documents per customer
+- extraction at 20 documents a second, capped by the model provider's rate limit
 
-### Lazy compute: run rulesets when money is about to move
+|                                                           | Parse at ingestion              | Lazy compute                                  |
+| --------------------------------------------------------- | ------------------------------- | --------------------------------------------- |
+| First answer on cold data (200 documents, 3 round trips)  | Milliseconds                    | About 3 minutes                               |
+| Time from onboarding a new customer to their first answer | Full ingestion pass: ~1.4 hours | One query's documents: about 3 minutes        |
+| Where load spikes come from                               | Bulk uploads at onboarding      | Bursts of queries, such as month-end renewals |
 
-Rulesets don't sweep the corpus on a schedule. They run as a query when a spend decision is pending: a purchase order about to be placed, or a recurring contract coming up for renewal. `?- ensure_uniform_spend(V, oak03, valet_trash, Gap).` asks only about that property and category, so work grows with decisions rather than documents, and a finding is fresh when someone can act on it.
+**Verdict.** We choose lazy compute because we expect the scaling bottleneck to come mainly from write traffic (millions of uploaded documents to process), and because cold-start latency is tolerable for customers: money saved is money saved, whether it takes a minute or 15 minutes to find.
 
-Nothing is extracted ahead of the questions. The leaves of every ruleset, such as `rate/4`, `doors/2` and `explained/3`, are facts in a fixed vocabulary, and Prolog never touches a raw document. A model reads each fact from its source when a rule first asks for it, quoting the words it read. Prolog's evaluation order makes this sparse: in `portfolio_gap(P), \+ explained(P)`, the contract is only read for a property whose gap already fired.
+**Mitigating latency.** A background _refresh-ahead_ job (cache warming) slowly extracts every field for likely queries, such as contracts nearing renewal, using spare capacity, so most queries hit warm facts.
 
-This is also what keeps extraction honest. Every value in a finding was requested by the proof that uses it, so an end-to-end test from raw document to finding covers extraction too. A separate parse stage, run on a guess about which fields will matter, would be a second place to hallucinate that those tests never see. And it keeps rulesets general: they're written against the shared vocabulary of leaf predicates, and formats are handled beneath it. A new layout adds clauses, and no ruleset changes. A layout the model has handled can be compiled into a tested parser that answers the same request without a model (see [Keeping MARC's own costs down](#keeping-marcs-own-costs-down)).
+### Decision 2: Read-through fact cache (populated on demand by the rules)
 
-### Routing decides what a query may touch
+_Extensibility vs Worst-case cost_
 
-The query reaches its documents through deterministic routing, not a model. Each ruleset is tagged with the goods and service categories it covers. Owner–vendor metadata, indexed in an ordinary table of owner, vendor, category and period, gives the vendors in those categories, and only their documents are read. That index is the one thing filled up front, and it's cheap because it holds metadata, not extracted values.
+![Side by side: a fixed schema fills every field of every document, including fields no rule uses, and backfills a new column when the ruleset is amended. The read-through cache computes only the leaves the rules reach, in batched model calls, and the amended ruleset adds one batch on top of cached work](docs/img/architecture.svg)
 
-Routing is where the costliest inaccuracy lives, because a document that's never read can't be cited. A routing miss can also cause a false call. `\+ explained(...)` succeeds when no explaining document was read, so a contract the router skipped looks the same as no explanation. The same holds for rules that take a minimum or a latest value. Two guards follow:
+_Structured data is stored in a sparse, content-addressed fact table, filled on demand by the rules._
 
-- Route the evidence a rule negates more broadly than the evidence it asserts: every contract between the owner and the vendor, whatever its category.
-- Answer "undetermined" instead of calling when the documents for the period are incomplete, such as a month with no invoice.
+The motivating constraint is that we can't know which fields in a document a piece of business logic introduced next month or next quarter will need. Yet we still need a structured representation of raw sources, so that piecing together information spread across multiple sources doesn't become prohibitively expensive.
 
-### Reuse: persist facts, not answers
+Here we compare the baseline, a fixed relational schema designed from what we know now, with migrations and backfills as new rules arrive, against a read-through cache.
 
-Rulesets that share terms share work. A `rate(_, oak03, valet_trash, _)` read for one ruleset or an earlier purchase order is reused by the next one, so the more of the vocabulary rulesets share, the more of each query is a cache hit. Two things get cached, in different places:
+**Tradeoff.** Given 100,000 documents of 9 fields each, a fact read that costs $0.001, and a full ingestion pass that costs $0.003 per document:
 
-- A **fact** is what a model read from a document, such as "the rate on line 8 is $22.00". It costs a model call, so it's stored in Postgres.
-- A **derived answer** is what rules conclude from facts, such as "OAK-03 is $3.50 over". It costs milliseconds of Prolog, so it stays in memory (tabling) and can be recomputed from stored facts at any time.
+|                                                      | Fixed schema | Read-through cache |
+| ---------------------------------------------------- | ------------ | ------------------ |
+| Extract the facts the rules need (average case\*)    | $300         | $100               |
+| Amend the ruleset with one new fact (average case\*) | $100         | $25                |
+| Worst case: every document is read                   | $300         | $400               |
 
-Facts go in one narrow table, with a row only for facts some query has asked for:
+_\*Average case: rules reach 4 fields on 25% of documents._
 
-```
-fact(document_hash, predicate, arguments, value, evidence, extractor_version, created_at)
-```
+**Verdict.** Given that the space of savings opportunities is unbounded, and depends on document formats and industry conventions that only surface through working with real customers, the data structure has to be extensible enough to keep both development and operational (token spend) costs low.
 
-- **No migration.** A new kind of fact is a new value in `predicate`, not a new column.
-- **No backfill.** A missing row means nobody has asked yet. It's computed the first time a rule needs it.
-- **The key does the invalidation.** A changed document has a new hash, and a changed prompt or model bumps the extractor version. Either way the old row stops matching and the fact is read again when next needed.
-- **"Asked, and the document doesn't say" is a row too.** Without it the system asks again on every query. It also keeps "not stated" apart from "not yet read", which a rule like `\+ explained(...)` must not confuse.
+**Mitigating worst-case cost.** When a fact is asked for on most documents, promote it to eager extraction: one full pass is cheaper per document than many reads on demand. Layouts seen often are compiled into parsers, which take those reads off the model entirely.
 
-Prolog stays pure, and the host program runs a loop: load the stored facts for the documents routing selects, run the query, put the facts it found missing on the queue, let workers extract them in batches and store the results, and run again until nothing is missing.
+### Decision 3: Rule-directed retrieval, not semantic search
 
-### What this gives up
+_Precision vs Recall_
 
-- **Latency on cold data.** Extraction happens when a query runs, so the first query on a document waits on model calls. Background warming of likely queries can soften it.
-- **No standing inventory.** There's no list of every opportunity in a portfolio, and a sparse table can't answer "show me everything" without first computing everything, which is the baseline's cost again. The benchmark will have to replay purchase decisions instead of scoring one sweep.
+![Two separate Prolog rules with explicit math. Rule 1, the fee-cap rule, passes its test and ships now. Rule 2, the billable-doors rule, fails its test and is delayed to next quarter while rule 1 ships without it](docs/img/overview.svg)
 
-## Run
+The search strategy for savings opportunities has the most direct impact on MARC's value proposition of reducing client OpEx, yet it is also the greatest source of uncertainty in the system, and the part most likely to change. The two previous decisions decouple business logic from data infrastructure, which keeps development overhead low and frees us to choose the search strategy that best accomplishes business objectives without lock-in risk.
 
-```
-npm install
-npm run marc -- bench --seeds 1 2 3 4 5   # score the baseline
-npm run marc -- dump --seed 1             # write one world's documents to sample/
-npm test
-```
+To that end, we compare two families of search strategy: semantic, where a model decides which passages matter and reasons over them, and rule-directed, where a rule names the facts it needs and does the reasoning itself.
 
-TypeScript on Node 22.12+, with no runtime dependencies.
+**Tradeoff.**
 
-## The synthetic world
+|           | Semantic search                                                                                     | Rule-directed retrieval                                                                      |
+| --------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Precision | Lower: a passage that looks relevant can supply the wrong value, and a missing value goes unnoticed | Higher: every value is one the rule named, and a missing one makes the answer "undetermined" |
+| Recall    | Open-ended: can surface any gap that resembles the question, including ones nobody anticipated      | Bounded: finds only the gaps some rule encodes                                               |
 
-Recall can't be measured on real data, because nobody knows the full set of agreements. That gap is the reason MARC is valuable. So the generator builds the hidden agreements first and renders documents from them, which makes ground truth exact and free.
+**Verdict.** We favour precision over recall: a false finding sends an agent to dispute a price that was correct, which damages user trust, while a missed one can be caught later by another rule. Rule-directed retrieval also fails usefully. An "undetermined" answer names the exact fact it couldn't find, which maps directly onto MARC's ability to ask the vendor through an AI agent.
 
-Each seed has 4 owners across 3 regions, about 20 properties, 24 months of billing and roughly 2,000 invoices. It plants:
-
-- vendor name variants on 30% of invoices
-- two invoice layouts, fixed per vendor
-- per-vendor descriptions and unit labels, including trade shorthand ("FEL SVC 4YD", "JAN SVC - MONTHLY")
-- annual escalators of 0–5%, on agreements that started up to 2.5 years before the window
-- off-contract purchases at a 12–40% premium, for a quarter of property-categories
-- bills that exist only as a GL line (8%), and GL lines booked to the wrong account (5%)
-- pricing sheets for about half the agreements
-- one external market quote per region and category
-
-The weakness is that it's only as realistic as its noise model. The first job with real data is to calibrate the generator against one redacted GL export and a few dozen invoices.
-
-`marc dump` writes a world's documents to `sample/`, with the hidden truth in `sample/_hidden/world.json`.
+**Mitigating recall.** The bounded recall of rule-directed retrieval maps neatly onto the development roadmap: missed cases can be collected, analyzed and encoded into new rulesets while existing rules stay live.
 
 ## Benchmark
 
-| Column                    | Meaning                                                                                                                                                   |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| relationships P / R       | Precision and recall against hidden arrangements. A relationship is matched through the lines it cites, not by name, so one with no evidence can't score. |
-| duplicates                | Arrangements reported more than once, e.g. one vendor under two spellings. Costs precision.                                                               |
-| never read                | Hidden arrangements none of whose documents the engine cited. Costs recall.                                                                               |
-| rate within 2%            | Share of matched relationships whose current rate is right.                                                                                               |
-| unsourced                 | Relationships whose reported rate isn't on any line they cite. Must stay 0.                                                                               |
-| opportunities P / R       | Against the opportunities the same rules find in the hidden truth.                                                                                        |
-| savings found / available | Estimated annual savings: the true value of the opportunities found, against all of them. Estimated, not realized.                                        |
-| savings claimed           | What the engine itself estimates. The gap from "found" is a calibration error.                                                                            |
-| model spend               | From the ledger every model call charges.                                                                                                                 |
+To verify the rule-directed search strategy, we tested a toy implementation on the FCC political advertising filings: orders that US TV stations published for the 2014 elections. We chose them because they map onto the topology of owner–vendor relationships in multifamily properties:
 
-### Baseline
+| MARC                        | Advertising orders                      |
+| --------------------------- | --------------------------------------- |
+| Property-management company | Media-buying agency                     |
+| Property, billed separately | Each campaign the agency buys for       |
+| Vendor                      | TV station                              |
+| Service category            | Time slot (days, hours and spot length) |
+| Price per unit              | Rate per spot                           |
 
-`npm run marc -- bench --seeds 1 2 3 4 5`. A test fails if this table stops matching what the code produces.
+The dataset has 10,985 labeled orders, of which 5,467 from 87 stations have a downloadable PDF, in a public folder linked by the [DeepForm](https://github.com/project-deepform/deepform) project.
 
-| seed | invoices used | relationships P / R | duplicates | never read | rate within 2% | unsourced | opportunities P / R | savings found / available | savings claimed | model spend |
-| ---- | ------------- | ------------------- | ---------- | ---------- | -------------- | --------- | ------------------- | ------------------------- | --------------- | ----------- |
-| 1    | 500/1764      | 31% / 29%           | 51         | 57         | 100%           | 0         | 46% / 14%           | $20.3k / $61.1k           | $11.9k          | $0.00       |
-| 2    | 535/2123      | 27% / 25%           | 65         | 72         | 100%           | 0         | 36% / 22%           | $21.1k / $62.2k           | $15.6k          | $0.00       |
-| 3    | 644/2131      | 30% / 30%           | 67         | 67         | 100%           | 0         | 35% / 18%           | $15.7k / $102.0k          | $13.4k          | $0.00       |
-| 4    | 917/1759      | 32% / 52%           | 90         | 38         | 95%            | 0         | 42% / 30%           | $10.7k / $38.0k           | $8.9k           | $0.00       |
-| 5    | 789/1927      | 30% / 41%           | 85         | 52         | 100%           | 0         | 21% / 16%           | $13.8k / $80.9k           | $12.9k          | $0.00       |
-| all  | 3385/9704     | 30% / 35%           | 358        | 286        | 99%            | 0         | 34% / 19%           | $81.6k / $344.1k          | $62.7k          | $0.00       |
+### Results
 
-What it says:
+The question: is an agency overpaying, relative to its lowest rate, for the same time slot on the same station across its different campaigns?
 
-- **Every false positive is a duplicate.** Each one is a vendor showing up under a second spelling of its name. Vendor resolution is the first fix, and the cheapest.
-- **Every miss is an arrangement never read.** Of the 286, 157 come from vendors that use the invoice layout the baseline can't parse. Another 86 have a description no keyword catches, and 43 have both problems.
-- **Rates are right when found (99%).** The hard part is coverage, which is also where the call landed.
-- **It under-claims.** It estimates $62.7k in total, less than the $81.6k its correct finds are actually worth. A vendor split across spellings splits its volume, so annual quantities come out low.
+Scored on 1,164 orders (81 agency-and-station groups) from 19 stations drawn at random and held out from development, with 19 more sealed in reserve. 57 flagged lines were judged true findings.
 
-### Experimental setup
+- Haiku 5.5 + Prolog rule: [uniform_spend.pl](prolog/rules/uniform_spend.pl)
+- Haiku 5.5 alone: [prompt](prolog/bench/run.ts#L245)
+- Opus 5.5 alone: [prompt](prolog/bench/run.ts#L245)
 
-The synthetic world gives exact ground truth but invented noise. The next benchmark runs on real documents: TV stations' political advertising orders from 2014, which US broadcasters must publish.
+|                          | Haiku 5.5 + Prolog rule (proposed) | Haiku 5.5 alone | Opus 5.5 alone     |
+| ------------------------ | ---------------------------------- | --------------- | ------------------ |
+| Precision (95% interval) | **96%** [87, 99]                   | 75% [62, 85]    | 97% [88, 99]       |
+| Recall (95% interval)    | 86% [75, 93]                       | 68% [56, 79]    | **100%** [94, 100] |
+| Cost                     | **$2.69**                          | $3.58           | $32.66             |
+| Cost per correct finding | **$0.05**                          | $0.09           | $0.57              |
 
-Why this dataset:
+The rule matches Opus's precision at **<10%** of its cost. As expected, it suffers in recall (86% compared to 100%).
 
-- **Real documents.** 10,985 labeled orders, of which 5,467 from 87 stations have a downloadable PDF, in a public folder linked by the [DeepForm](https://github.com/project-deepform/deepform) project. All 144 orders sampled from 24 stations have a text layer and share one layout, so this dataset does not test extensibility (requirement 1).
-- **Real pre-negotiated terms.** Each order states the agreed rate for every line: a time slot, a week, a rate per spot and a priority class.
-- **Open labels.** Contract number, advertiser, dates and total for each order come from [Alex Byrnes's dataset](https://github.com/alexbyrnes/FCC-Political-Ads), released as public domain (CC0).
-- **Nothing planted.** Every discrepancy scored is one that exists in the documents.
+### Replicate
 
-How it maps to MARC:
+Needs SWI-Prolog, `pdftotext`, Python 3, Node 22.12+ and `ANTHROPIC_API_KEY` in `.env`.
 
-| MARC                                      | Advertising orders                                                          |
-| ----------------------------------------- | --------------------------------------------------------------------------- |
-| Property-management company               | Media-buying agency                                                         |
-| Property, billed separately               | Each campaign the agency buys for                                           |
-| Vendor                                    | TV station                                                                  |
-| Service category                          | Time slot (days, hours and spot length)                                     |
-| Price per unit                            | Rate per spot                                                               |
-| A clause that explains a price difference | The line's priority class, which sets whether the station may bump the spot |
+```
+npm install
+python3 prolog/bench/build_input.py --draw 19 --seed 20261112 --exclude KNXV-TV --out prolog/out/test-input.json
+PILOT_BUDGET_USD=120 npx tsx prolog/bench/run.ts --input prolog/out/test-input.json --run test
+PILOT_BUDGET_USD=40 npx tsx prolog/bench/judge.ts --input prolog/out/test-input.json --run test
+```
 
-So "Ensure uniform spend" asks: when one agency buys the same slot on the same station in the same week for two campaigns, do they pay the same rate?
+Each arm writes to `prolog/out/test-<arm>.json`. The run costs about $39 across the three model arms, plus about $20 for the judge.
 
-A check on one station (KNXV-TV, 215 orders, 3,030 lines read by Claude Haiku 5.5 for $0.39) found the comparison is there to make. Haiku's rate and spot count matched the printed row on all 2,803 lines a strict pattern could also read. Five agencies bought the same slot in the same week for two or more campaigns 48 times. The rates matched 34 times and differed by more than 10% the other 14, for example $1,200 against $2,000 for the 10pm news. Every line carries a priority class, so each gap can be tested for an explanation.
+### Modify and test
 
-Limits: ad rates move by design, so many gaps are legitimate. The dataset has orders but no invoices, so it measures consistency between deals, not billing errors. And line-level truth has to be built by having a stronger model read the lines and a person check a sample.
-
-### Benchmarking results
-
-On 1,164 real advertising orders from 19 held-out TV stations, checking that one agency's clients pay the same rate for the same slot:
-
-| | Haiku 5.5 alone | Haiku 5.5 + Prolog rule | Opus 5.5 alone |
-|---|---|---|---|
-| Precision (95% interval) | 75% [62, 85] | 96% [87, 99] | **97% [88, 99]** |
-| Recall (95% interval) | 68% [56, 79] | 86% [75, 93] | **100% [94, 100]** |
-| Cost | $3.58 | **$2.69** | $32.66 |
-| Cost per correct finding | $0.09 | **$0.05** | $0.57 |
-
-One run per approach, with findings judged by Claude Fable 5.2 rather than a person. The setup, the errors and the limits are in [results/2026-11-12-uniform-spend-19-stations.md](results/2026-11-12-uniform-spend-19-stations.md).
-
-## Keeping MARC's own costs down
-
-Planned tiers, cheapest first:
-
-1. **Deterministic first.** A vendor's invoices share a layout, so a parser per layout costs nothing per invoice.
-2. **A small model once per distinct string, not once per document.** Seed 1 has 1,764 invoices, but only 61 distinct vendor names and 10 distinct descriptions.
-3. **A large model only for the low-confidence, high-dollar residue.**
-4. **Compile and freeze.** When a model handles a new layout or description, it writes the parser or table entry for it. That artifact is tested against labeled invoices and versioned, and from then on it runs without a model. A model upgrade becomes a recompile you can diff, not a silent change in what MARC recommends.
-
-## Roadmap
-
-- [x] synthetic world, renderers, benchmark harness
-- [x] deterministic baseline and opportunity rules
-- [ ] vendor resolution: normalize, fuzzy match, small model for what's left
-- [ ] parser for the second layout; model fallback for unknown layouts, compiled into parsers
-- [ ] description → category with a small model, cached per distinct string
-- [ ] unit normalization
-- [ ] escalator inference from price steps; pricing sheet ingestion
-- [ ] spend recovery from GL lines alone (missing invoices, miscoded accounts)
-- [ ] "undetermined" as an answer: thin-evidence opportunities return the question that would settle them
-- [ ] simulated vendor for the verify loop, answering from the hidden world
-- [ ] vendor reasons recorded as rule exceptions, so an explained gap isn't called twice
-- [ ] fence vendor-written text before it reaches any model
-- [ ] one traced purchase request, end to end
-
-Out of scope: SSO, real voice calls, UI, payments. Every output stops at a draft a human approves.
-
-## Open questions for real data
-
-- What does a customer's handoff look like: GL exports from their property-management system, invoice PDFs from accounts payable, or both?
-- Are contracts in it, or only invoices?
-- How often can customers produce pricing sheets?
-- Is property master data (owner, region, size) good enough to compare like with like?
-
-## Docs
-
-- [Reference: Aethis](docs/references/aethis.md): what a frozen-ruleset decision engine teaches MARC about keeping accuracy when models change.
+1. **Change one thing:**
+   - the rule: [prolog/rules/uniform_spend.pl](prolog/rules/uniform_spend.pl), or pass `--rule v2` to use [uniform_spend_v2.pl](prolog/rules/uniform_spend_v2.pl);
+   - the proposed arm's read prompt: `READ` in [run.ts](prolog/bench/run.ts#L103);
+   - the model-alone prompt: `TASK` in [run.ts](prolog/bench/run.ts#L245);
+   - how order versions are linked: [build_input.py](prolog/bench/build_input.py#L121), where the KPTV order-number bug lives.
+2. **Run the rule's tests:** `cd prolog && swipl -g run_tests -t halt tests/uniform_spend.plt`
+3. **Score on the development station,** under a new `--run` name. Runs resume from saved work, so reusing a name reuses old answers.
+   ```
+   python3 prolog/bench/build_input.py --stations KNXV-TV --out prolog/out/dev-input.json
+   npx tsx prolog/bench/run.ts --input prolog/out/dev-input.json --run dev-mychange --arms proposed
+   npx tsx prolog/bench/judge.ts --input prolog/out/dev-input.json --run dev-mychange --arms proposed
+   ```
+   Arms are `pattern`, `proposed`, `haiku-only` (Haiku 5.5 alone) and `trivial` (Opus 5.5 alone).
+4. **Confirm once on held-out data.** The 19 test stations above became development data when version 2 was tuned on them, so score a finished change once on the sealed reserve stations: `--stations KAAL,KABC-TV,KARE,KCTV,KGTV,KIMT,KIVV-TV,KKTV,KLSR-TV,KMOV,KPDX,KPNX,KPRC-TV,KSAT-TV,KSDK,KTVK,KVVU-TV,KXTV,WDIV-TV`. Any change after that makes them development data too.

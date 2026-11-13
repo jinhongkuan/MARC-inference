@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" width="960" height="420" role="img" aria-label="Left, parse at ingestion: every document is parsed into every field; qty, total, date and acct are parsed but never used, and amending uniform_price to uniform_price_v2 backfills a clause column across every document. Right, lazy from the rules: uniform_price reaches only vendor, item, price and doors through portfolio_gap and per_door, read in one batched model call; uniform_price_v2 reuses that work from the cache and adds clause in a second batch; qty, total, date and acct are never computed.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" width="960" height="420" role="img" aria-label="Left, fixed schema: every document is parsed into every field; qty, total, date and acct are parsed but never used, and amending uniform_price to uniform_price_v2 backfills a clause column across every document. Right, read-through cache: uniform_price reaches only vendor, item, price and doors through portfolio_gap and per_door, read in one batched model call; uniform_price_v2 reuses that work from the cache and adds clause in a second batch; qty, total, date and acct are never computed.">
 <style>
 .s{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif}.m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .t{font-size:13px;font-weight:600;fill:#111}
@@ -11,8 +11,8 @@
 .hit{font-size:9.5px;fill:#8c959f;font-style:italic}
 </style>
 <rect x="0.5" y="0.5" width="959" height="419" rx="14" fill="#fff" stroke="#e5e7eb"/>
-<text x="40" y="36" class="s t">Parse at ingestion</text>
-<text x="516" y="36" class="s t">Lazy, from the rules</text>
+<text x="40" y="36" class="s t">Fixed schema</text>
+<text x="516" y="36" class="s t">Read-through cache</text>
 <line x1="474" y1="24" x2="474" y2="362" stroke="#eaeef2"/>
 <text x="59.0" y="88" class="s col" text-anchor="middle">vendor</text>
 <rect x="40.0" y="98" width="38" height="12" rx="2" fill="#57606a"/>
