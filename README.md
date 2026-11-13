@@ -56,16 +56,6 @@ The baseline's weak point is that someone has to guess the fields before knowing
 
 What Prolog doesn't decide is which documents it searches. That set is fixed ahead of time from **owner–vendor metadata**, before any rule runs (see [Routing decides what a query may touch](#routing-decides-what-a-query-may-touch)). The diagram shows the design this spike builds toward, and its figures are illustrative.
 
-## From gap to phone call
-
-A ruleset states something an owner's spend should satisfy. Each place the spend fails it becomes a call for a voice agent to make.
-
-![Four invoice totals that look normal, factored into doors times price per door under a named rule; one property pays more per door, and that gap goes to an agent that phones the vendor](docs/img/rulesets.svg)
-
-"Ensure uniform spend" expects one price per door for the same service across an owner's properties. In code it's the `portfolio_gap` rule in [src/discover.ts](src/discover.ts): flag any rate more than 10% above the owner's best rate for the same category and unit. Monthly totals hide a breach, because they grow with property size. Factored into doors × price per door, OAK-03 pays $22.00 where the owner's other properties pay $18.50. That's $840 a month, and every number in it cites a source line.
-
-The citations are what make the call worth placing. The agent can ask something specific: why does OAK-03 pay $3.50 a door more than three sister properties, and will the vendor match? Either answer settles the gap. A matched price becomes a draft a human approves. A reason, such as a different service level or a contract clause nobody extracted, should be recorded as an exception the rule respects, so an explained gap never gets a second call. None of this loop is built yet: the spike stops before the call, and the simulated vendor on the roadmap is where it gets tested. The figures are illustrative.
-
 ## The architecture
 
 A Prolog engine runs rulesets over a sparse Postgres fact table, and a message queue feeds the facts it's missing to batched extraction workers that read them from the source documents.
