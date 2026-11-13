@@ -1,0 +1,22 @@
+{
+  "name": "marc-inference",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Spike: infer owner-vendor relationships from invoices, GL exports and pricing sheets, find missed savings, and benchmark what each pipeline costs to run.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "marc": "tsx src/cli.ts",
+    "test": "vitest run",
+    "typecheck": "tsc"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}

@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 430" width="960" height="430" role="img" aria-label="UML-style component diagram. Out of scope, as the motivating use case: a pending spend decision and the voice agent. A spend decision queries the Prolog engine, which loads stored facts from a sparse Postgres fact table. Facts it finds missing go onto a message queue; extraction workers drain the queue in batches, read the source documents from the document store, and write the facts back, and the engine reruns. Findings go to a voice agent, and a human approves.">
+<style>
+.s{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif}
+.n{font-size:12.5px;font-weight:600;fill:#111}
+.d{font-size:10.5px;fill:#6b7280}
+.st{font-size:9.5px;fill:#57606a}
+.e{font-size:10px;fill:#57606a;font-style:italic}
+</style>
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#57606a"/></marker></defs>
+<rect x="0.5" y="0.5" width="959" height="429" rx="14" fill="#fff" stroke="#e5e7eb"/>
+<rect x="35.0" y="181.0" width="170" height="62" rx="4" fill="#fff" stroke="#8c959f" stroke-width="1.3" stroke-dasharray="5 4"/>
+<rect x="183.0" y="189.0" width="14" height="16" fill="#fff" stroke="#8c959f" stroke-width="1.1"/>
+<rect x="179.0" y="192.0" width="8" height="4" fill="#fff" stroke="#8c959f" stroke-width="1.1"/>
+<rect x="179.0" y="198.0" width="8" height="4" fill="#fff" stroke="#8c959f" stroke-width="1.1"/>
+<text x="47.0" y="201" class="s st">«trigger»</text>
+<text x="47.0" y="217" class="s n" style="fill:#57606a">Spend decision</text>
+<text x="47.0" y="232" class="s d">purchase order, renewal</text>
+<rect x="285.0" y="181.0" width="190" height="62" rx="4" fill="#fff" stroke="#24292f" stroke-width="1.3"/>
+<rect x="453.0" y="189.0" width="14" height="16" fill="#fff" stroke="#24292f" stroke-width="1.1"/>
+<rect x="449.0" y="192.0" width="8" height="4" fill="#fff" stroke="#24292f" stroke-width="1.1"/>
+<rect x="449.0" y="198.0" width="8" height="4" fill="#fff" stroke="#24292f" stroke-width="1.1"/>
+<text x="297.0" y="201" class="s st">«component»</text>
+<text x="297.0" y="217" class="s n" style="fill:#111">Prolog engine</text>
+<text x="297.0" y="232" class="s d">rules + tabling (in memory)</text>
+<path d="M559.0,181.0 H721.0 A9,31.0 0 0 1 721.0,243.0 H559.0 A9,31.0 0 0 1 559.0,181.0 Z" fill="#fff" stroke="#24292f" stroke-width="1.3"/>
+<path d="M721.0,181.0 A9,31.0 0 0 0 721.0,243.0" fill="none" stroke="#24292f" stroke-width="1.3"/>
+<text x="569.0" y="201" class="s st">«queue»</text>
+<text x="569.0" y="217" class="s n" style="fill:#111">Message queue</text>
+<text x="569.0" y="232" class="s d">missing facts</text>
+<path d="M285.0,304.0 A95.0,8 0 0 1 475.0,304.0 V360.0 A95.0,8 0 0 1 285.0,360.0 Z" fill="#fff" stroke="#24292f" stroke-width="1.3"/>
+<path d="M285.0,304.0 A95.0,8 0 0 0 475.0,304.0" fill="none" stroke="#24292f" stroke-width="1.3"/>
+<text x="297.0" y="327" class="s st">«Postgres»</text>
+<text x="297.0" y="343" class="s n" style="fill:#111">Fact table</text>
+<text x="297.0" y="358" class="s d">sparse: only facts asked for</text>
+<rect x="550.0" y="301.0" width="180" height="62" rx="4" fill="#fff8c5" stroke="#d4a72c" stroke-width="1.3"/>
+<rect x="708.0" y="309.0" width="14" height="16" fill="#fff" stroke="#d4a72c" stroke-width="1.1"/>
+<rect x="704.0" y="312.0" width="8" height="4" fill="#fff" stroke="#d4a72c" stroke-width="1.1"/>
+<rect x="704.0" y="318.0" width="8" height="4" fill="#fff" stroke="#d4a72c" stroke-width="1.1"/>
+<text x="562.0" y="321" class="s st">«component»</text>
+<text x="562.0" y="337" class="s n" style="fill:#111">Extraction workers</text>
+<text x="562.0" y="352" class="s d">batched llm, compiled parsers</text>
+<rect x="787.0" y="301.0" width="150" height="62" rx="4" fill="#fff" stroke="#24292f" stroke-width="1.3"/>
+<path d="M913.0,309.0 h9 l5,5 v13 h-14 z" fill="#fff" stroke="#24292f" stroke-width="1.1"/>
+<path d="M922.0,309.0 v5 h5" fill="none" stroke="#24292f" stroke-width="1.1"/>
+<text x="799.0" y="321" class="s st">«object store»</text>
+<text x="799.0" y="337" class="s n" style="fill:#111">Documents</text>
+<text x="799.0" y="352" class="s d">raw files, by hash</text>
+<rect x="550.0" y="61.0" width="180" height="62" rx="4" fill="#fff" stroke="#24292f" stroke-width="1.3"/>
+<path d="M706.0,69.0 h9 l5,5 v13 h-14 z" fill="#fff" stroke="#24292f" stroke-width="1.1"/>
+<path d="M715.0,69.0 v5 h5" fill="none" stroke="#24292f" stroke-width="1.1"/>
+<text x="562.0" y="81" class="s st">«artifact»</text>
+<text x="562.0" y="97" class="s n" style="fill:#111">Findings</text>
+<text x="562.0" y="112" class="s d">each value cites its source</text>
+<rect x="787.0" y="61.0" width="150" height="62" rx="4" fill="#fff" stroke="#8c959f" stroke-width="1.3" stroke-dasharray="5 4"/>
+<rect x="915.0" y="69.0" width="14" height="16" fill="#fff" stroke="#8c959f" stroke-width="1.1"/>
+<rect x="911.0" y="72.0" width="8" height="4" fill="#fff" stroke="#8c959f" stroke-width="1.1"/>
+<rect x="911.0" y="78.0" width="8" height="4" fill="#fff" stroke="#8c959f" stroke-width="1.1"/>
+<text x="799.0" y="81" class="s st">«agent»</text>
+<text x="799.0" y="97" class="s n" style="fill:#57606a">Voice agent</text>
+<text x="799.0" y="112" class="s d">a human approves</text>
+<line x1="205" y1="212" x2="283" y2="212" stroke="#57606a" stroke-width="1.3" marker-end="url(#ar)" stroke-dasharray="5 4"/>
+<text x="245" y="204" class="s e" text-anchor="middle">query</text>
+<line x1="380" y1="296" x2="380" y2="245.0" stroke="#57606a" stroke-width="1.3" marker-end="url(#ar)"/>
+<text x="388" y="276" class="s e" text-anchor="start">load facts, rerun</text>
+<line x1="475" y1="212" x2="548" y2="212" stroke="#57606a" stroke-width="1.3" marker-end="url(#ar)"/>
+<text x="512" y="204" class="s e" text-anchor="middle">missing</text>
+<line x1="640" y1="243.0" x2="640" y2="299.0" stroke="#57606a" stroke-width="1.3" marker-end="url(#ar)"/>
+<text x="648" y="276" class="s e" text-anchor="start">drain in batches</text>
+<line x1="730" y1="332" x2="785" y2="332" stroke="#57606a" stroke-width="1.3" marker-end="url(#ar)"/>
+<text x="758" y="324" class="s e" text-anchor="middle">read</text>
+<line x1="550" y1="332" x2="477" y2="332" stroke="#57606a" stroke-width="1.3" marker-end="url(#ar)"/>
+<text x="512" y="324" class="s e" text-anchor="middle">write</text>
+<line x1="430" y1="181.0" x2="548" y2="102" stroke="#57606a" stroke-width="1.3" marker-end="url(#ar)"/>
+<text x="478" y="140" class="s e" text-anchor="end">gaps</text>
+<line x1="730" y1="92" x2="785" y2="92" stroke="#57606a" stroke-width="1.3" marker-end="url(#ar)" stroke-dasharray="5 4"/>
+<line x1="32" y1="384" x2="928" y2="384" stroke="#eaeef2"/>
+<rect x="32" y="400" width="26" height="14" rx="3" fill="none" stroke="#8c959f" stroke-width="1.3" stroke-dasharray="5 4"/>
+<text x="66" y="411" class="s d">out of scope: the motivating use case</text>
+</svg>

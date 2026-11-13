@@ -1,0 +1,192 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 616" width="960" height="616" role="img" aria-label="Left: one prompt to a frontier model over invoices, a price sheet and contracts; an attention heatmap over the same excerpt is uneven across equally consequential numbers, and the answer is vague. Right: encoded Prolog strategies search the same excerpt with targeted highlights and compute explicitly. The fee-cap rule passes at $146.32 a month over cap; the billable-doors rule v1 never queries the price sheet, returns $0.00 and fails its test, a blindspot fixed in dev. Expanding coverage becomes a scenario-enumeration task that can be independently verified and iteratively optimized.">
+<style>
+.s{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif}.m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.h{font-size:15px;font-weight:600;fill:#111}
+.sub{font-size:12px;fill:#6b7280}
+.cap{font-size:9px;letter-spacing:1.3px;font-weight:600;fill:#6b7280}
+.dochead{font-size:8.5px;letter-spacing:0.6px;font-weight:700;fill:#57606a}
+.doc{font-size:9px;fill:#24292f}.docb{font-weight:700;fill:#0550ae}
+.snip{font-size:8.5px;fill:#24292f}
+.ln{fill:#afb8c1}
+.dots{font-size:8.5px;fill:#afb8c1;letter-spacing:2px}
+.q{font-size:11.5px;font-style:italic;fill:#374151}
+.miss{font-size:12.5px;font-style:italic;fill:#cf222e}
+.count{font-size:10px;fill:#6b7280}
+.w{font-size:13px;font-weight:600;fill:#fff}
+.arrowtxt{font-size:11.5px;fill:#374151}
+.code{font-size:9px;fill:#24292f}
+.fn{fill:#8250df}.var{fill:#953800}.num{fill:#0550ae}.kw{fill:#cf222e}.atom{fill:#0a3069}.ink{fill:#24292f}.cmt{fill:#8c959f}
+.ntag{font-size:7.5px;letter-spacing:1px;font-weight:700;fill:#8c959f}
+.calc{font-size:9.5px;fill:#24292f}.calcbad{fill:#cf222e;font-weight:700}
+.res{font-size:11.5px;font-weight:700;fill:#1a7f37}.resu{font-size:10px;fill:#57606a}
+.resbad{font-size:11.5px;font-weight:700;fill:#cf222e}
+.missed{font-size:7.5px;font-weight:700;fill:#cf222e}
+.note{font-size:10.5px;fill:#4d2d00;font-weight:600}
+.notesub{font-size:10px;fill:#6c4a00}
+.legend{font-size:8.5px;fill:#8c959f}
+.plus{font-size:15px;fill:#9ca3af}
+.bigmiss{font-size:14px;font-weight:600;fill:#cf222e}
+.state{font-size:12.5px;font-weight:600;fill:#111}
+.metric{font-size:10px;fill:#57606a}.metricbig{font-size:11px;font-weight:700;fill:#111}
+</style>
+<rect x="0.5" y="0.5" width="959" height="615" rx="14" fill="#fff" stroke="#e5e7eb"/>
+<defs><linearGradient id="fadeTop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.95"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><linearGradient id="fadeBot" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity="0.95"/></linearGradient></defs>
+<text x="28" y="46" class="s h" text-anchor="start">One prompt, implicit math</text>
+<text x="28" y="78" class="s ntag" text-anchor="start">ACCURACY</text>
+<text x="28" y="96" class="s ntag" text-anchor="start">COST / TASK</text>
+<text x="28" y="114" class="s ntag" text-anchor="start">TOKENS / TASK</text>
+<rect x="106" y="71" width="96" height="8" rx="4" fill="#eaeef2" stroke="none" stroke-width="1"/>
+<rect x="155.9" y="71" width="37.4" height="8" rx="4" fill="#e5534b" stroke="none" stroke-width="1"/>
+<text x="210" y="79" class="s metric" text-anchor="start">52–91% by run</text>
+<text x="106" y="97" class="s metricbig" text-anchor="start">$4.10</text>
+<text x="106" y="115" class="s metric" text-anchor="start">~310k</text>
+<line x1="28" y1="128" x2="284" y2="128" stroke="#eaeef2" stroke-width="1"/>
+<text x="28" y="148" class="s ntag" text-anchor="start">WHAT THE MODEL ATTENDS TO</text>
+<rect x="28" y="154" width="256" height="200" rx="5" fill="#fff" stroke="#d0d7de" stroke-width="1"/>
+<text x="38" y="170" class="s ntag" text-anchor="start">PRICE SHEET</text>
+<text x="38" y="183.5" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln"> 1  </tspan><tspan class="ink">Waste 8yd FEL 3x/wk     </tspan><tspan class="ink">1,240.00</tspan><tspan class="ink"> /mo</tspan></text>
+<rect x="180.3" y="189.5" width="27.6" height="11.5" rx="2" fill="rgba(251,133,0,0.26)" stroke="none" stroke-width="1"/>
+<text x="38" y="197.0" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln"> 2  </tspan><tspan class="ink">Surcharges, all-in      </tspan><tspan class="ink">≤ 25%</tspan><tspan class="ink"> of base</tspan></text>
+<text x="38" y="210.5" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln"> 3  </tspan><tspan class="ink">Valet trash             </tspan><tspan class="ink">22.00</tspan><tspan class="ink"> /door</tspan></text>
+<rect x="180.3" y="216.5" width="17.4" height="11.5" rx="2" fill="rgba(251,133,0,0.15)" stroke="none" stroke-width="1"/>
+<text x="38" y="224.0" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln"> 4  </tspan><tspan class="ink">Billable doors          </tspan><tspan class="ink">240</tspan></text>
+<text x="38" y="237.5" class="s ntag" text-anchor="start">INVOICE 207</text>
+<rect x="180.3" y="243.5" width="42.9" height="11.5" rx="2" fill="rgba(251,133,0,0.78)" stroke="none" stroke-width="1"/>
+<text x="38" y="251.0" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln"> 8  </tspan><tspan class="ink">8yd FEL 3x/wk           </tspan><tspan class="ink">1,240.00</tspan></text>
+<rect x="129.1" y="257.0" width="17.4" height="11.5" rx="2" fill="rgba(251,133,0,0.43)" stroke="none" stroke-width="1"/>
+<rect x="195.6" y="257.0" width="32.7" height="11.5" rx="2" fill="rgba(251,133,0,0.54)" stroke="none" stroke-width="1"/>
+<text x="38" y="264.5" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln"> 9  </tspan><tspan class="ink">Fuel recovery </tspan><tspan class="ink">14%</tspan><tspan class="ink">          </tspan><tspan class="ink">173.60</tspan></text>
+<rect x="129.1" y="270.5" width="22.5" height="11.5" rx="2" fill="rgba(251,133,0,0.22)" stroke="none" stroke-width="1"/>
+<rect x="195.6" y="270.5" width="32.7" height="11.5" rx="2" fill="rgba(251,133,0,0.36)" stroke="none" stroke-width="1"/>
+<text x="38" y="278.0" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln">10  </tspan><tspan class="ink">Environmental </tspan><tspan class="ink">20%*</tspan><tspan class="ink">         </tspan><tspan class="ink">282.72</tspan></text>
+<rect x="83.1" y="284.0" width="94.1" height="11.5" rx="2" fill="rgba(251,133,0,0.15)" stroke="none" stroke-width="1"/>
+<text x="38" y="291.5" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln">11  </tspan><tspan class="ink">* on </tspan><tspan class="ink">charges incl. fuel</tspan></text>
+<text x="38" y="305.0" class="s ntag" text-anchor="start">INVOICE 318</text>
+<rect x="118.9" y="311.0" width="48.1" height="11.5" rx="2" fill="rgba(251,133,0,0.33)" stroke="none" stroke-width="1"/>
+<rect x="180.3" y="311.0" width="27.6" height="11.5" rx="2" fill="rgba(251,133,0,0.43)" stroke="none" stroke-width="1"/>
+<text x="38" y="318.5" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln"> 6  </tspan><tspan class="ink">Valet trash </tspan><tspan class="ink">252 doors</tspan><tspan class="ink"> @ </tspan><tspan class="ink">22.00</tspan></text>
+<rect x="180.3" y="324.5" width="42.9" height="11.5" rx="2" fill="rgba(251,133,0,0.75)" stroke="none" stroke-width="1"/>
+<text x="38" y="332.0" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln"> 7  </tspan><tspan class="ink">Amount due              </tspan><tspan class="ink">5,544.00</tspan></text>
+<text x="38" y="345.5" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln"> 8  </tspan><tspan class="ink">Terms: due on receipt</tspan></text>
+<rect x="29" y="155" width="254" height="18" rx="0" fill="url(#fadeTop)" stroke="none" stroke-width="1"/>
+<rect x="29" y="335" width="254" height="18" rx="0" fill="url(#fadeBot)" stroke="none" stroke-width="1"/>
+<text x="28" y="370" class="s legend" text-anchor="start">attention</text>
+<rect x="72" y="362" width="12" height="9" rx="0" fill="rgba(251,133,0,0.12)" stroke="none" stroke-width="1"/>
+<rect x="84" y="362" width="12" height="9" rx="0" fill="rgba(251,133,0,0.26)" stroke="none" stroke-width="1"/>
+<rect x="96" y="362" width="12" height="9" rx="0" fill="rgba(251,133,0,0.4)" stroke="none" stroke-width="1"/>
+<rect x="108" y="362" width="12" height="9" rx="0" fill="rgba(251,133,0,0.54)" stroke="none" stroke-width="1"/>
+<rect x="120" y="362" width="12" height="9" rx="0" fill="rgba(251,133,0,0.68)" stroke="none" stroke-width="1"/>
+<rect x="132" y="362" width="12" height="9" rx="0" fill="rgba(251,133,0,0.82)" stroke="none" stroke-width="1"/>
+<text x="146" y="370" class="s legend" text-anchor="start">low → high</text>
+<line x1="156" y1="380" x2="156" y2="393" stroke="#111" stroke-width="1.25"/>
+<path d="M152,389 L156,394 L160,389" fill="none" stroke="#111" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="108" y="400" width="96" height="26" rx="7" fill="#111" stroke="none" stroke-width="1"/>
+<text x="156" y="417" class="s w" text-anchor="middle">LLM</text>
+<line x1="156" y1="432" x2="156" y2="445" stroke="#111" stroke-width="1.25"/>
+<path d="M152,441 L156,446 L160,441" fill="none" stroke="#111" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="48" y="452" width="216" height="28" rx="8" fill="#f3f4f6" stroke="none" stroke-width="1"/>
+<text x="156" y="470" class="s q" text-anchor="middle">“Waste fees look high. Save ~$40k?”</text>
+<text x="156" y="518" class="s bigmiss" text-anchor="middle">attention uneven across equally</text>
+<text x="156" y="536" class="s bigmiss" text-anchor="middle">consequential numbers</text>
+<line x1="298" y1="30" x2="298" y2="590" stroke="#e5e7eb" stroke-width="1"/>
+<text x="314" y="46" class="s h" text-anchor="start">Encoded strategies, explicit math</text>
+<text x="314" y="78" class="s ntag" text-anchor="start">ACCURACY</text>
+<text x="314" y="96" class="s ntag" text-anchor="start">COST / TASK</text>
+<text x="314" y="114" class="s ntag" text-anchor="start">TOKENS / TASK</text>
+<rect x="392" y="71" width="138" height="8" rx="4" fill="#eaeef2" stroke="none" stroke-width="1"/>
+<rect x="525.9" y="71" width="3" height="8" rx="4" fill="#2da44e" stroke="none" stroke-width="1"/>
+<text x="538" y="79" class="s metric" text-anchor="start">98%</text>
+<text x="392" y="97" class="s metricbig" text-anchor="start">$0.002</text>
+<text x="392" y="115" class="s metric" text-anchor="start">~6k</text>
+<line x1="314" y1="128" x2="602" y2="128" stroke="#eaeef2" stroke-width="1"/>
+<rect x="314" y="138" width="288" height="88" rx="6" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1"/>
+<text x="594" y="150" class="s ntag" text-anchor="end">RULE · PROLOG</text>
+<text x="324" y="160" class="m code" text-anchor="start" xml:space="preserve"><tspan class="cmt">% surcharges stay within the vendor's cap</tspan></text>
+<text x="324" y="172" class="m code" text-anchor="start" xml:space="preserve"><tspan class="fn">over_fee_cap</tspan><tspan class="ink">(</tspan><tspan class="var">Inv</tspan><tspan class="ink">,</tspan><tspan class="ink"> </tspan><tspan class="var">Over</tspan><tspan class="ink">)</tspan><tspan class="ink"> </tspan><tspan class="kw">:-</tspan></text>
+<text x="324" y="184" class="m code" text-anchor="start" xml:space="preserve"><tspan class="ink">  </tspan><tspan class="fn">vendor</tspan><tspan class="ink">(</tspan><tspan class="var">Inv</tspan><tspan class="ink">,</tspan><tspan class="ink"> </tspan><tspan class="var">V</tspan><tspan class="ink">)</tspan><tspan class="ink">,</tspan><tspan class="ink"> </tspan><tspan class="fn">base</tspan><tspan class="ink">(</tspan><tspan class="var">Inv</tspan><tspan class="ink">,</tspan><tspan class="ink"> </tspan><tspan class="var">B</tspan><tspan class="ink">)</tspan><tspan class="ink">,</tspan><tspan class="ink"> </tspan><tspan class="fn">fee_cap</tspan><tspan class="ink">(</tspan><tspan class="var">V</tspan><tspan class="ink">,</tspan><tspan class="ink"> </tspan><tspan class="var">Cap</tspan><tspan class="ink">)</tspan><tspan class="ink">,</tspan></text>
+<text x="324" y="196" class="m code" text-anchor="start" xml:space="preserve"><tspan class="ink">  </tspan><tspan class="fn">fees</tspan><tspan class="ink">(</tspan><tspan class="var">Inv</tspan><tspan class="ink">,</tspan><tspan class="ink"> </tspan><tspan class="var">B</tspan><tspan class="ink">,</tspan><tspan class="ink"> </tspan><tspan class="var">Fees</tspan><tspan class="ink">)</tspan><tspan class="ink">,</tspan><tspan class="ink">     </tspan><tspan class="cmt">% compounds</tspan></text>
+<text x="324" y="208" class="m code" text-anchor="start" xml:space="preserve"><tspan class="ink">  </tspan><tspan class="var">Over</tspan><tspan class="ink"> </tspan><tspan class="kw">is</tspan><tspan class="ink"> </tspan><tspan class="var">Fees</tspan><tspan class="ink"> </tspan><tspan class="kw">-</tspan><tspan class="ink"> </tspan><tspan class="var">B</tspan><tspan class="kw">*</tspan><tspan class="var">Cap</tspan><tspan class="ink">,</tspan><tspan class="ink"> </tspan><tspan class="var">Over</tspan><tspan class="ink"> </tspan><tspan class="kw">&gt;</tspan><tspan class="ink"> </tspan><tspan class="num">0</tspan><tspan class="ink">.</tspan></text>
+<path d="M458,226 C458,235.0 458,235.0 458,244" fill="none" stroke="#afb8c1" stroke-width="1.1"/>
+<text x="314" y="240" class="s ntag" text-anchor="start">SEARCH</text>
+<rect x="314" y="244" width="288" height="158" rx="5" fill="#fff" stroke="#d0d7de" stroke-width="1"/>
+<text x="324" y="260" class="s ntag" text-anchor="start">PRICE SHEET</text>
+<text x="324" y="273.5" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln"> 4  </tspan><tspan class="ink">Billable doors          </tspan><tspan class="ink">240</tspan></text>
+<rect x="466.3" y="279.5" width="27.6" height="11.5" rx="2" fill="rgba(251,133,0,0.68)" stroke="none" stroke-width="1"/>
+<text x="324" y="287.0" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln"> 2  </tspan><tspan class="ink">Surcharges, all-in      </tspan><tspan class="ink">≤ 25%</tspan><tspan class="ink"> of base</tspan></text>
+<text x="324" y="300.5" class="s ntag" text-anchor="start">INVOICE 318</text>
+<text x="324" y="314.0" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln"> 6  </tspan><tspan class="ink">Valet trash </tspan><tspan class="ink">252 doors</tspan><tspan class="ink"> @ </tspan><tspan class="ink">22.00</tspan></text>
+<text x="324" y="327.5" class="s ntag" text-anchor="start">INVOICE 207</text>
+<rect x="466.3" y="333.5" width="42.9" height="11.5" rx="2" fill="rgba(251,133,0,0.68)" stroke="none" stroke-width="1"/>
+<text x="324" y="341.0" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln"> 8  </tspan><tspan class="ink">8yd FEL 3x/wk           </tspan><tspan class="ink">1,240.00</tspan></text>
+<rect x="415.1" y="347.0" width="17.4" height="11.5" rx="2" fill="rgba(251,133,0,0.68)" stroke="none" stroke-width="1"/>
+<text x="324" y="354.5" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln"> 9  </tspan><tspan class="ink">Fuel recovery </tspan><tspan class="ink">14%</tspan><tspan class="ink">          </tspan><tspan class="ink">173.60</tspan></text>
+<rect x="415.1" y="360.5" width="22.5" height="11.5" rx="2" fill="rgba(251,133,0,0.68)" stroke="none" stroke-width="1"/>
+<text x="324" y="368.0" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln">10  </tspan><tspan class="ink">Environmental </tspan><tspan class="ink">20%*</tspan><tspan class="ink">         </tspan><tspan class="ink">282.72</tspan></text>
+<rect x="369.1" y="374.0" width="94.1" height="11.5" rx="2" fill="rgba(251,133,0,0.68)" stroke="none" stroke-width="1"/>
+<text x="324" y="381.5" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln">11  </tspan><tspan class="ink">* on </tspan><tspan class="ink">charges incl. fuel</tspan></text>
+<rect x="315" y="245" width="286" height="18" rx="0" fill="url(#fadeTop)" stroke="none" stroke-width="1"/>
+<rect x="315" y="383" width="286" height="18" rx="0" fill="url(#fadeBot)" stroke="none" stroke-width="1"/>
+<path d="M458,402 C458,411.0 458,411.0 458,420" fill="none" stroke="#afb8c1" stroke-width="1.1"/>
+<text x="314" y="416" class="s ntag" text-anchor="start">CALCULATE</text>
+<rect x="314" y="420" width="288" height="36" rx="5" fill="#fff" stroke="#d0d7de" stroke-width="1"/>
+<text x="324" y="434" class="m" text-anchor="start" xml:space="preserve"><tspan class="calc">1,240 × (1.14 × 1.20 − 1) = 456.32</tspan></text>
+<text x="324" y="447" class="m" text-anchor="start" xml:space="preserve"><tspan class="calc">456.32 − 1,240 × 25% = 146.32</tspan></text>
+<path d="M458,456 C458,462.0 458,462.0 458,468" fill="none" stroke="#afb8c1" stroke-width="1.1"/>
+<rect x="314" y="468" width="288" height="28" rx="5" fill="#dafbe1" stroke="#4ac26b" stroke-width="1"/>
+<text x="324" y="486" class="s" text-anchor="start" xml:space="preserve"><tspan class="res">= $146.32</tspan><tspan class="resu"> / month over cap   ✓ test passes</tspan></text>
+<text x="612" y="78" class="s ntag" text-anchor="start">ACCURACY</text>
+<text x="612" y="96" class="s ntag" text-anchor="start">COST / TASK</text>
+<text x="612" y="114" class="s ntag" text-anchor="start">TOKENS / TASK</text>
+<rect x="690" y="71" width="138" height="8" rx="4" fill="#eaeef2" stroke="none" stroke-width="1"/>
+<rect x="786.6" y="71" width="3" height="8" rx="4" fill="#d4a72c" stroke="none" stroke-width="1"/>
+<text x="836" y="79" class="s metric" text-anchor="start">71%  (rule v1)</text>
+<text x="690" y="97" class="s metricbig" text-anchor="start">$0.002</text>
+<text x="690" y="115" class="s metric" text-anchor="start">~6k</text>
+<line x1="612" y1="128" x2="900" y2="128" stroke="#eaeef2" stroke-width="1"/>
+<rect x="612" y="138" width="288" height="88" rx="6" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1"/>
+<text x="892" y="150" class="s ntag" text-anchor="end">RULE · PROLOG</text>
+<text x="622" y="160" class="m code" text-anchor="start" xml:space="preserve"><tspan class="cmt">% only charge for billable doors</tspan></text>
+<text x="622" y="172" class="m code" text-anchor="start" xml:space="preserve"><tspan class="fn">over_billed</tspan><tspan class="ink">(</tspan><tspan class="var">Inv</tspan><tspan class="ink">,</tspan><tspan class="ink"> </tspan><tspan class="var">Over</tspan><tspan class="ink">)</tspan><tspan class="ink"> </tspan><tspan class="kw">:-</tspan></text>
+<text x="622" y="184" class="m code" text-anchor="start" xml:space="preserve"><tspan class="ink">  </tspan><tspan class="fn">site</tspan><tspan class="ink">(</tspan><tspan class="var">Inv</tspan><tspan class="ink">,</tspan><tspan class="ink"> </tspan><tspan class="var">S</tspan><tspan class="ink">)</tspan><tspan class="ink">,</tspan><tspan class="ink"> </tspan><tspan class="fn">rate</tspan><tspan class="ink">(</tspan><tspan class="var">Inv</tspan><tspan class="ink">,</tspan><tspan class="ink"> </tspan><tspan class="var">R</tspan><tspan class="ink">)</tspan><tspan class="ink">,</tspan></text>
+<text x="622" y="196" class="m code" text-anchor="start" xml:space="preserve"><tspan class="ink">  </tspan><tspan class="fn">billed_units</tspan><tspan class="ink">(</tspan><tspan class="var">Inv</tspan><tspan class="ink">,</tspan><tspan class="ink"> </tspan><tspan class="var">N</tspan><tspan class="ink">)</tspan><tspan class="ink">,</tspan></text>
+<text x="622" y="208" class="m code" text-anchor="start" xml:space="preserve"><tspan class="ink">  </tspan><tspan class="fn">doors</tspan><tspan class="ink">(</tspan><tspan class="var">Inv</tspan><tspan class="ink">,</tspan><tspan class="ink"> </tspan><tspan class="var">D</tspan><tspan class="ink">)</tspan><tspan class="ink">,</tspan><tspan class="ink">         </tspan><tspan class="cmt">% v1: read from invoice</tspan></text>
+<text x="622" y="220" class="m code" text-anchor="start" xml:space="preserve"><tspan class="ink">  </tspan><tspan class="var">Over</tspan><tspan class="ink"> </tspan><tspan class="kw">is</tspan><tspan class="ink"> </tspan><tspan class="ink">(</tspan><tspan class="var">N</tspan><tspan class="ink"> </tspan><tspan class="kw">-</tspan><tspan class="ink"> </tspan><tspan class="var">D</tspan><tspan class="ink">)</tspan><tspan class="ink"> </tspan><tspan class="kw">*</tspan><tspan class="ink"> </tspan><tspan class="var">R</tspan><tspan class="ink">.</tspan></text>
+<path d="M756,226 C756,235.0 756,235.0 756,244" fill="none" stroke="#afb8c1" stroke-width="1.1"/>
+<text x="612" y="240" class="s ntag" text-anchor="start">SEARCH</text>
+<rect x="612" y="244" width="288" height="158" rx="5" fill="#fff" stroke="#d0d7de" stroke-width="1"/>
+<text x="622" y="260" class="s ntag" text-anchor="start">PRICE SHEET</text>
+<rect x="763.3" y="265.0" width="19.4" height="13.5" rx="2" fill="none" stroke="#cf222e" stroke-width="1.1" stroke-dasharray="2 2"/>
+<text x="622" y="273.5" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln"> 4  </tspan><tspan class="ink">Billable doors          </tspan><tspan class="ink">240</tspan></text>
+<text x="622" y="287.0" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln"> 2  </tspan><tspan class="ink">Surcharges, all-in      </tspan><tspan class="ink">≤ 25%</tspan><tspan class="ink"> of base</tspan></text>
+<text x="622" y="300.5" class="s ntag" text-anchor="start">INVOICE 318</text>
+<rect x="702.9" y="306.5" width="48.1" height="11.5" rx="2" fill="rgba(251,133,0,0.68)" stroke="none" stroke-width="1"/>
+<rect x="764.3" y="306.5" width="27.6" height="11.5" rx="2" fill="rgba(251,133,0,0.68)" stroke="none" stroke-width="1"/>
+<text x="622" y="314.0" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln"> 6  </tspan><tspan class="ink">Valet trash </tspan><tspan class="ink">252 doors</tspan><tspan class="ink"> @ </tspan><tspan class="ink">22.00</tspan></text>
+<text x="622" y="327.5" class="s ntag" text-anchor="start">INVOICE 207</text>
+<text x="622" y="341.0" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln"> 8  </tspan><tspan class="ink">8yd FEL 3x/wk           </tspan><tspan class="ink">1,240.00</tspan></text>
+<text x="622" y="354.5" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln"> 9  </tspan><tspan class="ink">Fuel recovery </tspan><tspan class="ink">14%</tspan><tspan class="ink">          </tspan><tspan class="ink">173.60</tspan></text>
+<text x="622" y="368.0" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln">10  </tspan><tspan class="ink">Environmental </tspan><tspan class="ink">20%*</tspan><tspan class="ink">         </tspan><tspan class="ink">282.72</tspan></text>
+<text x="622" y="381.5" class="m snip" text-anchor="start" xml:space="preserve"><tspan class="ln">11  </tspan><tspan class="ink">* on </tspan><tspan class="ink">charges incl. fuel</tspan></text>
+<rect x="613" y="245" width="286" height="18" rx="0" fill="url(#fadeTop)" stroke="none" stroke-width="1"/>
+<rect x="613" y="383" width="286" height="18" rx="0" fill="url(#fadeBot)" stroke="none" stroke-width="1"/>
+<text x="788" y="274" class="s missed" text-anchor="start">← never queried</text>
+<path d="M756,402 C756,411.0 756,411.0 756,420" fill="none" stroke="#afb8c1" stroke-width="1.1"/>
+<text x="612" y="416" class="s ntag" text-anchor="start">CALCULATE</text>
+<rect x="612" y="420" width="288" height="36" rx="5" fill="#fff" stroke="#d0d7de" stroke-width="1"/>
+<text x="622" y="434" class="m" text-anchor="start" xml:space="preserve"><tspan class="calc">(252 − </tspan><tspan class="calc calcbad">252</tspan><tspan class="calc">) × 22.00 = 0.00</tspan></text>
+<text x="622" y="447" class="m" text-anchor="start" xml:space="preserve"><tspan class="calc cmt">doors came from the invoice</tspan></text>
+<path d="M756,456 C756,462.0 756,462.0 756,468" fill="none" stroke="#afb8c1" stroke-width="1.1"/>
+<rect x="612" y="468" width="288" height="28" rx="5" fill="#ffebe9" stroke="#cf222e" stroke-width="1.4"/>
+<text x="622" y="486" class="s" text-anchor="start" xml:space="preserve"><tspan class="resbad">= $0.00</tspan><tspan class="resu">   ✗ test expects $264.00</tspan></text>
+<text x="458" y="514" class="s state" text-anchor="middle">Expanding coverage becomes a scenario-</text>
+<text x="458" y="531" class="s state" text-anchor="middle">enumeration task that can be independently</text>
+<text x="458" y="548" class="s state" text-anchor="middle">verified and iteratively optimized.</text>
+<path d="M756,496 L756,508" fill="none" stroke="#d4a72c" stroke-width="1.2" stroke-dasharray="3 2"/>
+<rect x="612" y="508" width="288" height="56" rx="6" fill="#fff8c5" stroke="#d4a72c" stroke-width="1"/>
+<text x="622" y="525" class="s note" text-anchor="start">LLM blindspot uncovered and augmented in dev</text>
+<text x="622" y="540" class="s notesub" text-anchor="start">billable doors live on the price sheet, not the invoice;</text>
+<text x="622" y="554" class="s notesub" text-anchor="start">v2 reads billable_doors(S, D); passes at $264.00</text>
+<rect x="910" y="138" width="28" height="358" rx="6" fill="none" stroke="#d1d5db" stroke-width="1" stroke-dasharray="4 4"/>
+<text x="924" y="322" class="s plus" text-anchor="middle">+</text>
+<text x="932" y="602" class="s legend" text-anchor="end">metrics illustrative until benchmarked</text>
+</svg>

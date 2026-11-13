@@ -1,5 +1,6 @@
-.venv/
-__pycache__/
-.pytest_cache/
-*.egg-info/
+node_modules/
 sample/
+.env
+prolog/out/
+TODO.md
+.DS_Store
