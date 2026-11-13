@@ -4,7 +4,7 @@ Most agentic solutions for property management aim to automate the administrativ
 
 The search strategy for savings opportunities has the most direct impact on that value proposition, yet it's also the greatest source of uncertainty in the system and the part most likely to change. This repo proposes a hypothetical, scalable pipeline built around that tension, with stated trade-offs and mitigation strategies.
 
-The [benchmark](#benchmark) tests the rule-directed search strategy on a real-world dataset, where it matches a state-of-the-art model's precision at a fraction of the cost.
+On a real-world dataset, the [benchmark](#benchmark) tests a toy implementation of the search pipeline the system is built around, matching a state-of-the-art model's precision at a fraction of the cost.
 
 ## The problem
 
