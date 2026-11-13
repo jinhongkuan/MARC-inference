@@ -144,7 +144,7 @@ Scored on 1,164 orders (81 agency-and-station groups) from 19 stations drawn at 
 
 |                          | Haiku 5.5 + Prolog rule (proposed) | Haiku 5.5 alone | Opus 5.5 alone     |
 | ------------------------ | ---------------------------------- | --------------- | ------------------ |
-| Precision (95% interval) | **96%** [87, 99]                   | 75% [62, 85]    | 97% [88, 99]       |
+| Precision (95% interval) | 96% [87, 99]                       | 75% [62, 85]    | **97%** [88, 99]   |
 | Recall (95% interval)    | 86% [75, 93]                       | 68% [56, 79]    | **100%** [94, 100] |
 | Cost                     | **$2.69**                          | $3.58           | $32.66             |
 | Cost per correct finding | **$0.05**                          | $0.09           | $0.57              |
