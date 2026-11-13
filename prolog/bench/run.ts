@@ -21,7 +21,7 @@ import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { Random } from "../../src/random.ts";
+import { Random } from "./random.ts";
 import { askJson, type Call, HAIKU, ledger, OPUS, pool, rateLimited } from "./claude.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));

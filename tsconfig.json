@@ -14,5 +14,5 @@
     "noEmit": true,
     "skipLibCheck": true
   },
-  "include": ["src", "tests", "prolog/bench"]
+  "include": ["prolog/bench"]
 }

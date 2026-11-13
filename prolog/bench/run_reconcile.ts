@@ -22,7 +22,7 @@ import { appendFileSync, copyFileSync, existsSync, readFileSync, rmSync, writeFi
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { Random } from "../../src/random.ts";
+import { Random } from "./random.ts";
 import { askJson, type Call, HAIKU, ledger, OPUS, pool } from "./claude.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
