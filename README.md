@@ -8,7 +8,7 @@ It also compares ML pipelines on accuracy against what they cost MARC to run, be
 
 ## The problem
 
-Most negotiated rates aren't written down anywhere MARC can read. The rate a property really pays is a hidden variable, and the documents are noisy observations of it:
+Most negotiated rates aren't written down anywhere MARC can read. Documents provide noisy observations of the rate a property really pays, and the engine has to work back from those observations to implicit agreements, then find where a property pays more than it should:
 
 ```
                       hidden agreement
@@ -23,24 +23,38 @@ Most negotiated rates aren't written down anywhere MARC can read. The rate a pro
   vary                  in the wrong account
 ```
 
-The engine has to work back from those observations to the agreement, then find where a property pays more than it should.
+For example, the same vendor's valet trash invoices bill ELM-09 at $18.50 a door and OAK-03 at $22.00. Whether that's an overcharge depends on a third document: an amendment to the service agreement prices properties under 150 doors at $22.00, and everything larger at $18.50. OAK-03 has 240 doors, so it's overpaying $840 a month. Neither invoice points to the amendment, so MARC needs to construct this relationship on its own.
+
+### Requirements
+
+1. **Extensibility.** A new invoice layout, vendor spelling or document kind must not need infrastructure changes or expensive database migrations.
+2. **Accuracy.** Findings must get complex accounting right (escalators, per-unit rates, miscoded lines) precisely enough to justify a voice agent phoning a vendor.
+3. **Scale.** The engine must handle millions of raw sources.
+
+<details>
+<summary>Rationale</summary>
+
+- **Extensibility.** One ruleset has to hold across invoice layouts, vendor spellings, units and document kinds.
+- **Accuracy.** A finding chains arithmetic across documents, so one misread number changes the answer. A false call spends vendor goodwill and reads as spam. A missed one can be caught later by another ruleset. When the two conflict, precision wins.
+- **Scale.** The assumption is that volume grows mostly with the number of customers, not the size of one, so each customer's corpus stays small enough to query on its own. That holds for owner-operators. Revisit it when MARC sells to third-party managers, whose portfolios span many owners.
+
+</details>
+
+Standard retrieval-augmented generation (RAG) scales, but makes us pick between accuracy and extensibility. Vector search over document chunks works on any format, but returns passages that look relevant, not the exact rate a call needs. Text-to-SQL over an extracted schema is exact, but only for fields chosen up front.
 
 ## The approach
+
+To stay accurate without giving up extensibility, we propose a *neurosymbolic pipeline*: Prolog rulesets drive LLM extraction and perform arithmetic and logical operations deterministically. Documents are parsed lazily, and each fact is stored on its own against its source document, so a new rule can ask a new question of old documents without any re-ingestion or schema change.
+
+![Side by side: parse at ingestion fills every field of every document, including fields no rule uses, and backfills a new column when the ruleset is amended. The lazy design computes only the leaves the rules reach, in batched model calls, and the amended ruleset adds one batch on top of cached work](docs/img/architecture.svg)
+
+Parse at ingestion pays to extract every field up front, then pays again to backfill every document when a ruleset changes. The lazy design extracts only what the rules reach, and an amended ruleset adds one batched model call on top of cached work.
 
 One global judgment you can't measure becomes thousands of local ones you can.
 
 ![One prompt with implicit math, against encoded Prolog strategies with explicit math](docs/img/overview.svg)
 
-On 1,164 real advertising orders from 19 held-out TV stations, checking that one agency's clients pay the same rate for the same slot:
-
-| | Haiku 5.5 alone | Haiku 5.5 + Prolog rule | Opus 5.5 alone |
-|---|---|---|---|
-| Precision (95% interval) | 75% [62, 85] | 96% [87, 99] | **97% [88, 99]** |
-| Recall (95% interval) | 68% [56, 79] | 86% [75, 93] | **100% [94, 100]** |
-| Cost | $3.58 | **$2.69** | $32.66 |
-| Cost per correct finding | $0.09 | **$0.05** | $0.57 |
-
-One run per approach, with findings judged by Claude Fable 5.2 rather than a person. The setup, the errors and the limits are in [results/2026-11-12-uniform-spend-19-stations.md](results/2026-11-12-uniform-spend-19-stations.md).
+On real data, a Prolog rule let Haiku 5.5 match Opus 5.5's precision at a twelfth of the cost ([benchmarking results](#benchmarking-results)).
 
 There are three ways to answer a question like "does this invoice match what was agreed?"
 
@@ -62,9 +76,7 @@ A Prolog engine runs rulesets over a sparse Postgres fact table, and a message q
 
 ![A pending spend decision (out of scope, the motivating use case) queries the Prolog engine. The engine loads facts from a sparse Postgres fact table. Missing facts go onto a message queue, extraction workers drain it in batches, read the documents and write the facts back, and the engine reruns. Findings go to a voice agent (also out of scope) and a human approves](docs/img/system.svg)
 
-This is to support lazy compute: nothing is extracted until a rule asks for it, and anything extracted once is reused by every rule after. The test is amending a ruleset. Parse at ingestion pays for a new column on every document. The lazy design pays for one more batched model call, and only for the leaves the new rule reaches.
-
-![Side by side: parse at ingestion fills every field of every document, including fields no rule uses, and backfills a new column when the ruleset is amended. The lazy design computes only the leaves the rules reach, in batched model calls, and the amended ruleset adds one batch on top of cached work](docs/img/architecture.svg)
+This is to support lazy compute: nothing is extracted until a rule asks for it, and anything extracted once is reused by every rule after (see [The approach](#the-approach)).
 
 In short:
 
@@ -75,12 +87,6 @@ In short:
 - **The cost:** latency on cold data, and no standing list of every opportunity.
 
 The spike's code is still a staged pipeline (ingest, resolve, infer, discover). The rest of this section describes where it's headed.
-
-### Requirements
-
-1. **General across formats.** One ruleset holds across invoice layouts, vendor spellings, units and document kinds. A new format must not need a new ruleset.
-2. **Precise enough to place a call.** A finding has to justify a voice agent phoning a vendor. A false call spends vendor goodwill and reads as spam. A missed one can be caught later by another ruleset. When the two conflict, precision wins.
-3. **Scales to millions of raw sources.** The assumption is that volume grows mostly with the number of customers, not the size of one, so each customer's corpus stays small enough to query on its own. That holds for owner-operators. Revisit it when MARC sells to third-party managers, whose portfolios span many owners.
 
 ### Lazy compute: run rulesets when money is about to move
 
@@ -194,7 +200,7 @@ The synthetic world gives exact ground truth but invented noise. The next benchm
 
 Why this dataset:
 
-- **Real documents.** 10,985 labeled orders, of which 5,467 from 87 stations have a downloadable PDF, in a public folder linked by the [DeepForm](https://github.com/project-deepform/deepform) project. All 144 orders sampled from 24 stations have a text layer and share one layout, so this dataset does not test requirement 1 (many formats).
+- **Real documents.** 10,985 labeled orders, of which 5,467 from 87 stations have a downloadable PDF, in a public folder linked by the [DeepForm](https://github.com/project-deepform/deepform) project. All 144 orders sampled from 24 stations have a text layer and share one layout, so this dataset does not test extensibility (requirement 1).
 - **Real pre-negotiated terms.** Each order states the agreed rate for every line: a time slot, a week, a rate per spot and a priority class.
 - **Open labels.** Contract number, advertiser, dates and total for each order come from [Alex Byrnes's dataset](https://github.com/alexbyrnes/FCC-Political-Ads), released as public domain (CC0).
 - **Nothing planted.** Every discrepancy scored is one that exists in the documents.
@@ -215,6 +221,19 @@ So "Ensure uniform spend" asks: when one agency buys the same slot on the same s
 A check on one station (KNXV-TV, 215 orders, 3,030 lines read by Claude Haiku 5.5 for $0.39) found the comparison is there to make. Haiku's rate and spot count matched the printed row on all 2,803 lines a strict pattern could also read. Five agencies bought the same slot in the same week for two or more campaigns 48 times. The rates matched 34 times and differed by more than 10% the other 14, for example $1,200 against $2,000 for the 10pm news. Every line carries a priority class, so each gap can be tested for an explanation.
 
 Limits: ad rates move by design, so many gaps are legitimate. The dataset has orders but no invoices, so it measures consistency between deals, not billing errors. And line-level truth has to be built by having a stronger model read the lines and a person check a sample.
+
+### Benchmarking results
+
+On 1,164 real advertising orders from 19 held-out TV stations, checking that one agency's clients pay the same rate for the same slot:
+
+| | Haiku 5.5 alone | Haiku 5.5 + Prolog rule | Opus 5.5 alone |
+|---|---|---|---|
+| Precision (95% interval) | 75% [62, 85] | 96% [87, 99] | **97% [88, 99]** |
+| Recall (95% interval) | 68% [56, 79] | 86% [75, 93] | **100% [94, 100]** |
+| Cost | $3.58 | **$2.69** | $32.66 |
+| Cost per correct finding | $0.09 | **$0.05** | $0.57 |
+
+One run per approach, with findings judged by Claude Fable 5.2 rather than a person. The setup, the errors and the limits are in [results/2026-11-12-uniform-spend-19-stations.md](results/2026-11-12-uniform-spend-19-stations.md).
 
 ## Keeping MARC's own costs down
 
